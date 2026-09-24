@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# env örnek dosyası paylaşılabilir (gizli bilgi içermez)
+!.env.example
+
+# OS / editor
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
