@@ -1,14 +1,17 @@
 import type { MetadataRoute } from "next";
-import { projects } from "@/lib/projects";
-import { siteConfig } from "@/lib/site";
+import { getProjects } from "@/lib/content";
+import { siteUrl } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = siteConfig.url;
+// Sanity'ye eklenen projeler sitemap'e de yansısın.
+export const revalidate = 60;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const projects = await getProjects();
   return [
-    { url: base, changeFrequency: "monthly", priority: 1 },
-    { url: `${base}/projeler`, changeFrequency: "monthly", priority: 0.9 },
+    { url: siteUrl, changeFrequency: "monthly", priority: 1 },
+    { url: `${siteUrl}/projeler`, changeFrequency: "monthly", priority: 0.9 },
     ...projects.map((p) => ({
-      url: `${base}/projeler/${p.slug}`,
+      url: `${siteUrl}/projeler/${p.slug}`,
       changeFrequency: "yearly" as const,
       priority: 0.7,
     })),

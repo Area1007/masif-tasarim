@@ -18,6 +18,7 @@ export function ProjectCard({ project, aspect = "aspect-[4/5]", sizes = "(min-wi
           fill
           sizes={sizes}
           className="object-cover transition-transform duration-[1.4s] ease-(--ease-premium) group-hover:scale-[1.04]"
+          style={{ objectPosition: project.cover.position }}
         />
         <div className="absolute inset-0 bg-ink/0 transition-colors duration-700 group-hover:bg-ink/10" />
       </div>

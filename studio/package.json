@@ -1,0 +1,28 @@
+{
+  "name": "masif-tasarim-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "seed:build": "node scripts/build-seed.ts",
+    "seed:import": "sanity dataset import seed/seed.ndjson --dataset production --replace"
+  },
+  "dependencies": {
+    "@sanity/icons": "^5.2.2",
+    "@sanity/locale-tr-tr": "^1.2.38",
+    "@sanity/orderable-document-list": "^2.0.24",
+    "@sanity/vision": "^6.16.0",
+    "lexorank": "^1.0.5",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "sanity": "^6.16.0",
+    "styled-components": "^6.5.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}

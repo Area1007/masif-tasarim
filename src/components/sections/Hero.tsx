@@ -1,22 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/primitives";
-import { projects } from "@/lib/projects";
+import { RichText } from "@/components/ui/RichText";
+import { getHomeContent, getProjects } from "@/lib/content";
 
-const heroProject = projects.find((p) => p.slug === "mese-evi") ?? projects[0];
+export async function Hero() {
+  const [home, projects] = await Promise.all([getHomeContent(), getProjects()]);
+  const heroProject = projects.find((p) => p.slug === home.heroProjectSlug) ?? projects[0];
+  const image = home.heroImage ?? heroProject.cover;
 
-export function Hero() {
   return (
     <section aria-label="Giriş" className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-ink text-paper">
       <div className="absolute inset-0 -z-10">
         <Image
-          src={heroProject.cover.src}
-          alt={heroProject.cover.alt}
+          src={image.src}
+          alt={image.alt}
           fill
           preload
           sizes="100vw"
           quality={85}
           className="animate-hero-zoom object-cover"
+          style={{ objectPosition: image.position }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/20 to-ink/75" />
       </div>
@@ -26,13 +30,13 @@ export function Hero() {
           className="animate-fade-up mb-6 text-[11px] font-medium uppercase tracking-[0.32em] text-paper/80"
           style={{ animationDelay: "200ms" }}
         >
-          Mimari Tasarım · İç Mimarlık · Uygulama
+          {home.heroEyebrow}
         </p>
         <h1
           className="animate-fade-up max-w-5xl font-display text-[clamp(2.75rem,8vw,7.5rem)] leading-[0.95] tracking-[-0.02em]"
           style={{ animationDelay: "350ms" }}
         >
-          Hayalinizdeki mekânı tasarlıyor, <em className="text-bone/90">detaylarıyla</em> hayata geçiriyoruz.
+          <RichText value={home.heroTitle} emClassName="text-bone/90" />
         </h1>
 
         <div
@@ -40,8 +44,7 @@ export function Hero() {
           style={{ animationDelay: "600ms" }}
         >
           <p className="max-w-md text-[15px] leading-relaxed text-paper/80">
-            Konut, kafe, restoran ve ticari mekânlar için fikir aşamasından anahtar teslimine uzanan bütüncül bir
-            tasarım ve uygulama stüdyosu.
+            {home.heroText}
           </p>
           <div className="flex items-center gap-8">
             <Link

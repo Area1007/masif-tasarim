@@ -1,17 +1,14 @@
 /**
- * Proje verileri.
+ * Yedek (fallback) proje verileri.
  *
- * Tüm metinler ve görseller şimdilik placeholder'dır. Gerçek fotoğraflar
- * `public/projeler/<slug>/` altına eklendiğinde `src` alanları örneğin
- * "/projeler/mese-evi/kapak.jpg" şeklinde güncellenmesi yeterlidir.
+ * Projeler artık Sanity Studio'dan yönetilir. Bu liste yalnızca Sanity'ye
+ * ulaşılamadığında kullanılır ve Sanity'ye ilk aktarımın kaynağıdır.
  */
+import type { Img } from "../content/types.ts";
 
 export type ProjectCategory = "Konut" | "Kafe & Restoran" | "Ticari" | "Mimari";
 
-export type ProjectImage = {
-  src: string;
-  alt: string;
-};
+export type ProjectImage = Img;
 
 export type Project = {
   slug: string;
@@ -187,27 +184,3 @@ export const projectCategories: ProjectCategory[] = [
   "Ticari",
   "Mimari",
 ];
-
-export function getProject(slug: string) {
-  return projects.find((p) => p.slug === slug);
-}
-
-export function getFeaturedProjects() {
-  return projects.filter((p) => p.featured);
-}
-
-export function getAdjacentProject(slug: string) {
-  const index = projects.findIndex((p) => p.slug === slug);
-  return projects[(index + 1) % projects.length];
-}
-
-/** Ana sayfa galerisi için tüm projelerden derlenmiş görseller */
-export function getGalleryImages() {
-  const seen = new Set<string>();
-  return projects
-    .flatMap((p) =>
-      p.gallery.map((img) => ({ ...img, project: p.title, slug: p.slug })),
-    )
-    .filter((img) => !seen.has(img.src) && seen.add(img.src))
-    .slice(0, 9);
-}

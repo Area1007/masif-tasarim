@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { navItems, siteConfig } from "@/lib/site";
+import { navItems, telHref } from "@/lib/site";
 import { Logo } from "./Logo";
 
-export function Header() {
+export function Header({ phones }: { phones: string[] }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -65,12 +65,11 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-6">
-          <a
-            href={siteConfig.phones[0].href}
-            className="hidden text-[13px] font-medium tracking-[0.08em] xl:block"
-          >
-            {siteConfig.phones[0].label}
-          </a>
+          {phones[0] && (
+            <a href={telHref(phones[0])} className="hidden text-[13px] font-medium tracking-[0.08em] xl:block">
+              {phones[0]}
+            </a>
+          )}
           <Link
             href="/#iletisim"
             className={`hidden border px-5 py-2.5 text-[12px] font-medium uppercase tracking-[0.16em] transition-colors duration-500 sm:inline-block ${
@@ -121,9 +120,9 @@ export function Header() {
             ))}
           </ul>
           <div className="space-y-2 text-sm text-muted">
-            {siteConfig.phones.map((p) => (
-              <a key={p.href} href={p.href} className="block text-lg text-ink">
-                {p.label}
+            {phones.map((p) => (
+              <a key={p} href={telHref(p)} className="block text-lg text-ink">
+                {p}
               </a>
             ))}
           </div>

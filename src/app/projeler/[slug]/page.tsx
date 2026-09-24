@@ -5,18 +5,18 @@ import { notFound } from "next/navigation";
 import { ArrowIcon, Button, Container, Eyebrow } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/Reveal";
 import { ProjectGallery } from "@/components/sections/ProjectGallery";
-import { getAdjacentProject, getProject, projects } from "@/lib/projects";
-import { siteConfig } from "@/lib/site";
+import { getAdjacentProject, getProject, getProjects, getSiteSettings } from "@/lib/content";
 
-export const dynamicParams = false;
+// Sanity'ye sonradan eklenen projeler de yeniden deploy gerekmeden yayınlanır.
+export const dynamicParams = true;
 
-export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await getProjects()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/projeler/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProject(slug);
+  const [project, settings] = await Promise.all([getProject(slug), getSiteSettings()]);
   if (!project) return {};
 
   return {
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/projeler/[slug]">
     description: project.summary,
     alternates: { canonical: `/projeler/${project.slug}` },
     openGraph: {
-      title: `${project.title} | ${siteConfig.name}`,
+      title: `${project.title} | ${settings.name}`,
       description: project.summary,
       images: [{ url: project.cover.src, alt: project.cover.alt }],
     },
@@ -33,10 +33,10 @@ export async function generateMetadata({ params }: PageProps<"/projeler/[slug]">
 
 export default async function ProjectPage({ params }: PageProps<"/projeler/[slug]">) {
   const { slug } = await params;
-  const project = getProject(slug);
+  const project = await getProject(slug);
   if (!project) notFound();
 
-  const next = getAdjacentProject(project.slug);
+  const next = await getAdjacentProject(project.slug);
   const facts = [
     { label: "Kategori", value: project.category },
     { label: "Konum", value: project.location },
@@ -56,6 +56,7 @@ export default async function ProjectPage({ params }: PageProps<"/projeler/[slug
           sizes="100vw"
           quality={85}
           className="animate-hero-zoom -z-10 object-cover"
+          style={{ objectPosition: project.cover.position }}
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/40 via-transparent to-ink/75" />
         <Container className="animate-fade-up pb-12 pt-40 sm:pb-16">

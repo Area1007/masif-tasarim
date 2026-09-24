@@ -7,9 +7,11 @@ import { Gallery } from "@/components/sections/Gallery";
 import { Process } from "@/components/sections/Process";
 import { WhyUs } from "@/components/sections/WhyUs";
 import { ContactCTA } from "@/components/sections/ContactCTA";
-import { getGalleryImages } from "@/lib/projects";
+import { getGalleryImages, getHomeContent } from "@/lib/content";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [home, galleryImages] = await Promise.all([getHomeContent(), getGalleryImages()]);
+
   return (
     <>
       <Hero />
@@ -17,7 +19,12 @@ export default function HomePage() {
       <About />
       <Services />
       <FeaturedProjects />
-      <Gallery images={getGalleryImages()} />
+      <Gallery
+        images={galleryImages}
+        eyebrow={home.galleryEyebrow}
+        title={home.galleryTitle}
+        text={home.galleryText}
+      />
       <Process />
       <WhyUs />
       <ContactCTA />

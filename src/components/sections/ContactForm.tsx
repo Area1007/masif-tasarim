@@ -13,7 +13,7 @@ const fieldClass =
  * Teklif formu. Henüz bir e-posta/sunucu entegrasyonu olmadığı için form,
  * doldurulan bilgileri WhatsApp mesajı olarak hazırlar.
  */
-export function ContactForm() {
+export function ContactForm({ whatsapp }: { whatsapp: string }) {
   const [sent, setSent] = useState(false);
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -27,7 +27,7 @@ export function ContactForm() {
       data.get("message") ? `Not: ${data.get("message")}` : "",
     ].filter(Boolean);
 
-    window.open(whatsappLink(lines.join("\n")), "_blank", "noopener,noreferrer");
+    window.open(whatsappLink(whatsapp, lines.join("\n")), "_blank", "noopener,noreferrer");
     setSent(true);
   }
 

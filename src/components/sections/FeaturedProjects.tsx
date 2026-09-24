@@ -1,19 +1,20 @@
 import { Container, Eyebrow, TextLink } from "@/components/ui/primitives";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { Reveal } from "@/components/ui/Reveal";
-import { getFeaturedProjects } from "@/lib/projects";
+import { getFeaturedProjects, getHomeContent } from "@/lib/content";
 
-export function FeaturedProjects() {
-  const featured = getFeaturedProjects().slice(0, 4);
+export async function FeaturedProjects() {
+  const [home, featuredAll] = await Promise.all([getHomeContent(), getFeaturedProjects()]);
+  const featured = featuredAll.slice(0, 4);
 
   return (
     <section id="projeler" className="bg-paper pb-24 sm:pb-32 lg:pb-40">
       <Container>
         <div className="flex flex-col gap-8 border-t border-line pt-24 sm:flex-row sm:items-end sm:justify-between sm:pt-32">
           <Reveal>
-            <Eyebrow>Öne Çıkan Projeler</Eyebrow>
+            <Eyebrow>{home.featuredEyebrow}</Eyebrow>
             <h2 className="mt-8 max-w-2xl font-display text-[clamp(2.25rem,4vw,3.75rem)] leading-[1.05] tracking-[-0.015em]">
-              Her mekânın kendine ait bir hikâyesi var.
+              {home.featuredTitle}
             </h2>
           </Reveal>
           <Reveal delay={120}>

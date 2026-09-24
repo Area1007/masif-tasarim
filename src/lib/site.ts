@@ -1,22 +1,7 @@
-export const siteConfig = {
-  name: "Masif Tasarım ve Uygulama",
-  shortName: "Masif",
-  tagline: "Tasarımdan Uygulamaya",
-  description:
-    "Masif Tasarım ve Uygulama; konut, kafe, restoran ve ticari mekânlar için mimari tasarım, iç mimarlık, 3D görselleştirme ve anahtar teslim uygulama hizmetleri sunar.",
-  // Yayına alınırken gerçek alan adı NEXT_PUBLIC_SITE_URL ile verilmeli.
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  locale: "tr_TR",
-  phones: [
-    { label: "0542 611 61 38", href: "tel:+905426116138" },
-    { label: "0539 976 81 05", href: "tel:+905399768105" },
-  ],
-  whatsapp: "905426116138",
-  // Gerçek bilgiler geldiğinde doldurulacak; boş bırakılan alanlar sitede gösterilmez.
-  email: "",
-  address: "",
-  instagram: "",
-} as const;
+/** Kodda sabit kalan site yapısı. Düzenlenebilir içerikler Sanity'den gelir (bkz. lib/content.ts). */
+
+// Yayına alınırken gerçek alan adı NEXT_PUBLIC_SITE_URL ile verilmeli.
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const navItems = [
   { label: "Stüdyo", href: "/#hakkimizda" },
@@ -26,7 +11,20 @@ export const navItems = [
   { label: "İletişim", href: "/#iletisim" },
 ] as const;
 
-export function whatsappLink(message?: string) {
-  const base = `https://wa.me/${siteConfig.whatsapp}`;
+/** "0542 611 61 38" → "905426116138" (uluslararası biçim, yalnızca rakam) */
+export function toIntlNumber(phone: string) {
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  if (digits.startsWith("0")) digits = `90${digits.slice(1)}`;
+  if (digits.length === 10) digits = `90${digits}`;
+  return digits;
+}
+
+export function telHref(phone: string) {
+  return `tel:+${toIntlNumber(phone)}`;
+}
+
+export function whatsappLink(phone: string, message?: string) {
+  const base = `https://wa.me/${toIntlNumber(phone)}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
