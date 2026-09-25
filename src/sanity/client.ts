@@ -10,8 +10,12 @@ export const sanityConfig = {
 
 export const isSanityConfigured = Boolean(sanityConfig.projectId);
 
+// useCdn: false → her zaman en güncel yayınlanmış veri. Webhook sayfayı yayından hemen
+// sonra yenilediğinde Sanity'nin API CDN'i birkaç saniye eski veri döndürebilir ve bu eski
+// veri sayfada kalırdı. Sayfalar Next.js tarafından önbelleklendiği için API'ye yalnızca
+// sayfa yeniden üretilirken istek gider; CDN'e ihtiyaç yok.
 const client = isSanityConfigured
-  ? createClient({ ...sanityConfig, useCdn: true, perspective: "published" })
+  ? createClient({ ...sanityConfig, useCdn: false, perspective: "published" })
   : null;
 
 const builder = isSanityConfigured ? createImageUrlBuilder(sanityConfig) : null;
