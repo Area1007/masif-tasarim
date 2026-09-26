@@ -23,6 +23,8 @@ export type Project = {
   cover: ProjectImage;
   gallery: ProjectImage[];
   featured?: boolean;
+  /** Projenin eski adresleri; bu adreslere gelen ziyaretçi güncel adrese yönlendirilir. */
+  previousSlugs?: string[];
 };
 
 const unsplash = (id: string) =>

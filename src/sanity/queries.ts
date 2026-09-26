@@ -3,6 +3,7 @@ const image = `{ asset, alt, hotspot, crop }`;
 const projectFields = `
   title,
   "slug": slug.current,
+  previousSlugs,
   category,
   location,
   year,

@@ -1,6 +1,8 @@
 import {orderRankField, orderRankOrdering} from '../objects/orderRank'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 import {imageField, imageMember} from '../objects/helpers'
+import {LockedSlugInput} from '../../components/LockedSlugInput'
+import {SLUG_PATTERN, slugValidation, trimmedStringValidation, turkishSlugify} from '../objects/slug'
 
 export const projectCategories = ['Konut', 'Kafe & Restoran', 'Ticari', 'Mimari']
 
@@ -21,16 +23,33 @@ export const project = defineType({
       title: 'Proje adı',
       type: 'string',
       group: 'content',
-      validation: (r) => r.required(),
+      validation: trimmedStringValidation,
     }),
     defineField({
       name: 'slug',
       title: 'Sayfa adresi',
       type: 'slug',
       group: 'content',
-      description: 'Proje sayfasının adresi (ör. /projeler/mese-evi). "Generate" ile addan otomatik oluşturabilirsiniz.',
-      options: {source: 'title', maxLength: 80},
-      validation: (r) => r.required(),
+      description:
+        'Proje sayfasının adresi (ör. /projeler/mese-evi). Yeni projede "Generate" ile addan oluşturun. Proje yayınlandıktan sonra adres kilitlenir; proje adını değiştirmek adresi etkilemez.',
+      options: {source: 'title', maxLength: 80, slugify: (input: string) => turkishSlugify(input, 80)},
+      components: {input: LockedSlugInput},
+      validation: slugValidation,
+    }),
+    defineField({
+      name: 'previousSlugs',
+      title: 'Önceki adresler',
+      type: 'array',
+      group: 'content',
+      description:
+        'Adres değiştirildiğinde eski adres buraya otomatik eklenir; site eski adresi yeni adrese yönlendirir. Elle düzenlenmez.',
+      of: [defineArrayMember({type: 'string'})],
+      readOnly: true,
+      hidden: ({value}) => !value?.length,
+      validation: (r) =>
+        r.custom((value: string[] | undefined) =>
+          (value ?? []).every((s) => SLUG_PATTERN.test(s)) ? true : 'Önceki adreslerde geçersiz bir değer var.',
+        ),
     }),
     defineField({
       name: 'featured',

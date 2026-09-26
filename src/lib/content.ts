@@ -2,6 +2,7 @@ import { cache } from "react";
 import { defaultAbout, defaultHome, defaultProjectsPage, defaultServices, defaultSettings } from "@/content/defaults";
 import type { AboutContent, HomeContent, Img, ProjectsPageContent, Service, SiteSettings } from "@/content/types";
 import { projects as fallbackProjects, type Project, type ProjectCategory } from "@/lib/projects";
+import { normalizeSlug } from "@/lib/slug";
 import { sanityFetch, toImg, type SanityImage } from "@/sanity/client";
 import {
   aboutQuery,
@@ -46,10 +47,12 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
 
 export const getHomeContent = cache(async (): Promise<HomeContent> => {
   const data = await sanityFetch<Raw<HomeContent> & { heroImage?: SanityImage; whyImage?: SanityImage }>(homeQuery);
-  return merge(defaultHome, data, {
+  const home = merge(defaultHome, data, {
     heroImage: toImg(data?.heroImage),
     whyImage: toImg(data?.whyImage, 1400),
   });
+  // Proje listesindeki slug'larla aynı biçimde olmalı (bkz. getProjects)
+  return { ...home, heroProjectSlug: normalizeSlug(home.heroProjectSlug) };
 });
 
 export const getAboutContent = cache(async (): Promise<AboutContent> => {
@@ -83,13 +86,19 @@ type RawProject = Omit<Partial<Project>, "cover" | "gallery"> & { cover?: Sanity
 
 export const getProjects = cache(async (): Promise<Project[]> => {
   const data = await sanityFetch<RawProject[]>(projectsQuery);
+  const seenSlugs = new Set<string>();
   const projects = (data ?? []).flatMap((p): Project[] => {
     const cover = toImg(p.cover);
-    if (!p.title || !p.slug || !cover) return [];
+    // Studio'ya hatalı girilmiş adresler (ör. "mese-evi ") siteyi bozmasın: temizlenir.
+    // Aynı adrese düşen ikinci proje, çakışma olmasın diye listelenmez.
+    const slug = normalizeSlug(p.slug ?? "");
+    const title = p.title?.trim();
+    if (!title || !slug || !cover || seenSlugs.has(slug)) return [];
+    seenSlugs.add(slug);
     return [
       {
-        slug: p.slug,
-        title: p.title,
+        slug,
+        title,
         category: (p.category ?? "Konut") as ProjectCategory,
         location: p.location ?? "",
         year: p.year ?? "",
@@ -100,6 +109,7 @@ export const getProjects = cache(async (): Promise<Project[]> => {
         cover,
         gallery: (p.gallery ?? []).map((img) => toImg(img)).filter((img): img is Img => Boolean(img)),
         featured: Boolean(p.featured),
+        previousSlugs: (p.previousSlugs ?? []).map(normalizeSlug).filter((s) => s && s !== slug),
       },
     ];
   });
@@ -108,6 +118,16 @@ export const getProjects = cache(async (): Promise<Project[]> => {
 
 export async function getProject(slug: string) {
   return (await getProjects()).find((p) => p.slug === slug);
+}
+
+/**
+ * Eski bir adres hangi projeye aitse onu döndürür. Güncel adresler her zaman önceliklidir:
+ * başka bir projenin şu anki adresi olan bir değer yönlendirme için kullanılmaz.
+ */
+export async function getProjectByPreviousSlug(slug: string) {
+  const projects = await getProjects();
+  if (projects.some((p) => p.slug === slug)) return undefined;
+  return projects.find((p) => p.previousSlugs?.includes(slug));
 }
 
 export async function getFeaturedProjects() {

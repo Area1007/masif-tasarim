@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowIcon, Button, Container, Eyebrow } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/Reveal";
 import { ProjectGallery } from "@/components/sections/ProjectGallery";
-import { getAdjacentProject, getProject, getProjects, getSiteSettings } from "@/lib/content";
+import { getAdjacentProject, getProject, getProjectByPreviousSlug, getProjects, getSiteSettings } from "@/lib/content";
+import { decodeSlugParam, normalizeSlug } from "@/lib/slug";
 
 // Sanity'ye sonradan eklenen projeler de yeniden deploy gerekmeden yayınlanır.
 export const dynamicParams = true;
@@ -14,8 +15,13 @@ export async function generateStaticParams() {
   return (await getProjects()).map((p) => ({ slug: p.slug }));
 }
 
+/** URL'deki slug'ı çözer; Next.js parametreleri kodlanmış verebilir (ör. "mese-evi%20"). */
+async function resolveSlug(params: PageProps<"/projeler/[slug]">["params"]) {
+  return decodeSlugParam((await params).slug);
+}
+
 export async function generateMetadata({ params }: PageProps<"/projeler/[slug]">): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = await resolveSlug(params);
   const [project, settings] = await Promise.all([getProject(slug), getSiteSettings()]);
   if (!project) return {};
 
@@ -32,9 +38,20 @@ export async function generateMetadata({ params }: PageProps<"/projeler/[slug]">
 }
 
 export default async function ProjectPage({ params }: PageProps<"/projeler/[slug]">) {
-  const { slug } = await params;
+  const slug = await resolveSlug(params);
   const project = await getProject(slug);
-  if (!project) notFound();
+  if (!project) {
+    // 1) Hatalı yazılmış adres (ör. sonunda boşluk, büyük harf) → projenin doğru adresi
+    // 2) Projenin eski adresi (adres bilerek değiştirildiyse) → güncel adres
+    // Her ikisi de kalıcı yönlendirme (308); eşleşme yoksa 404.
+    const canonical = normalizeSlug(slug);
+    if (canonical && canonical !== slug && (await getProject(canonical))) {
+      permanentRedirect(`/projeler/${canonical}`);
+    }
+    const moved = canonical ? await getProjectByPreviousSlug(canonical) : undefined;
+    if (moved) permanentRedirect(`/projeler/${moved.slug}`);
+    notFound();
+  }
 
   const next = await getAdjacentProject(project.slug);
   const facts = [
