@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/*
+ * Kısa ve geniş masaüstü ekranlar (ör. 1366×768, 1280×720 dizüstü): ana sayfa hero'sunun
+ * dikey boşlukları sıkılaştırılır ki içeriğin tamamı ilk ekrana sığsın. 1024×768 bilerek
+ * dışarıda (orada mevcut düzen zaten sığıyor); 1440×900 ve üzeri, tablet ve mobil etkilenmez.
+ */
+@custom-variant short-desktop (@media (min-width: 1280px) and (max-height: 800px));
+
 @theme {
   /* Renk paleti: siyah, beyaz, kırık beyaz ve doğal ahşap tonları */
   --color-ink: #151413;

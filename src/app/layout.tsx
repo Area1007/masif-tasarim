@@ -76,7 +76,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         >
           İçeriğe geç
         </a>
-        <Header phones={settings.phones} logoLight={settings.logoLight} logoDark={settings.logoDark} />
+        <Header phones={settings.phones} />
         <main id="icerik" className="flex-1">
           {children}
         </main>

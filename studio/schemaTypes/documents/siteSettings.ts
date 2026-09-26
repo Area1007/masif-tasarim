@@ -50,15 +50,15 @@ export const siteSettings = defineType({
     logoField(
       'logoLight',
       'Site Logosu - Açık',
-      'Koyu/fotoğraflı arka planda (ana sayfa ve proje sayfalarının üst kısmı) kullanılan AÇIK renkli logo. ' +
-        'Şeffaf zeminli PNG, WebP veya SVG; yatay ya da sade bir logo önerilir. Header\'da en fazla 40px yükseklikte, ' +
-        'oranı korunarak gösterilir. Boş bırakılırsa bu zeminlerde yazı logosu kullanılır.',
+      'Ana sayfanın üst kısmında, fotoğrafın üzerinde BÜYÜK marka logosu olarak gösterilen AÇIK renkli logo. ' +
+        'Şeffaf zeminli PNG, WebP veya SVG. Kenarlardaki şeffaf boşluk otomatik kırpılır; oran korunur. ' +
+        'Boş bırakılırsa ana sayfada büyük logo gösterilmez.',
     ),
     logoField(
       'logoDark',
       'Site Logosu - Koyu',
-      'Beyaz/açık arka planda (sayfa kaydırıldığında, diğer sayfalarda ve mobil menüde) kullanılan KOYU renkli logo. ' +
-        'Şeffaf zeminli PNG, WebP veya SVG. Boş bırakılırsa bu zeminlerde yazı logosu kullanılır.',
+      'Beyaz/açık zeminler için KOYU renkli logo. Şimdilik sitede kullanılmıyor; ileride açık zeminli alanlar için saklanıyor. ' +
+        'Şeffaf zeminli PNG, WebP veya SVG.',
     ),
     headingField('footerStatement', 'Sayfa altı (footer) büyük cümle', {group: 'general'}),
 

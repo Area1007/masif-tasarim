@@ -49,21 +49,51 @@ export type SanityLogo = {
   asset?: { _id?: string; extension?: string; width?: number; height?: number } | null;
 } | null;
 
-/** Header'da logo en fazla 40px yüksekliğinde; yüksek yoğunluklu ekranlar için 4 katı istenir. */
-const LOGO_SOURCE_HEIGHT = 160;
-
 /**
- * Sanity logosunu header için hazırlar. Kırpma yapılmaz; oran korunur.
+ * Sanity logosunu olduğu gibi (kırpmasız, orijinal boyut ve oranla) döndürür.
  * SVG logolar PNG'ye çevrilir (Next.js görsel optimizasyonu SVG kabul etmez).
  */
 export function toLogo(logo: SanityLogo | undefined): LogoImage | undefined {
   const asset = logo?.asset;
   if (!builder || !asset?._id || !asset.width || !asset.height) return undefined;
-  const height = Math.min(LOGO_SOURCE_HEIGHT, asset.height);
-  const width = Math.round((asset.width / asset.height) * height);
-  let url = builder.image(asset._id).height(height).fit("max");
-  url = asset.extension === "svg" ? url.format("png") : url.auto("format");
-  return { src: url.url(), alt: logo?.alt ?? "", width, height };
+  const url = builder.image(asset._id);
+  return {
+    src: (asset.extension === "svg" ? url.format("png") : url.auto("format")).url(),
+    alt: logo?.alt ?? "",
+    width: asset.width,
+    height: asset.height,
+    assetId: asset._id,
+  };
+}
+
+/** PNG dosyasının başlığından (IHDR) genişlik ve yüksekliği okur. */
+function readPngSize(bytes: Uint8Array): { width: number; height: number } | null {
+  const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+  if (bytes.length < 24 || signature.some((b, i) => bytes[i] !== b)) return null;
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const width = view.getUint32(16);
+  const height = view.getUint32(20);
+  return width > 0 && height > 0 ? { width, height } : null;
+}
+
+/**
+ * Logonun etrafındaki şeffaf/tek renkli boşluğu Sanity görsel servisiyle kırpar
+ * (`trim=auto`), böylece logo yanındaki metinlerle aynı hizaya oturur. Dosyanın
+ * kendisi değişmez. Kırpılmış görselin boyutu PNG başlığından okunur (oran kesin olsun
+ * diye); aynı adres her zaman aynı sonucu verdiği için bu istek önbelleğe alınır.
+ * Herhangi bir sorunda kırpılmamış logo kullanılır.
+ */
+export async function trimLogo(logo: LogoImage): Promise<LogoImage> {
+  if (!builder || !logo.assetId) return logo;
+  const src = `${builder.image(logo.assetId).format("png").url()}&trim=auto`;
+  try {
+    const res = await fetch(src, { headers: { Range: "bytes=0-63" }, cache: "force-cache" });
+    if (!res.ok) return logo;
+    const size = readPngSize(new Uint8Array(await res.arrayBuffer()));
+    return size ? { ...logo, src, ...size } : logo;
+  } catch {
+    return logo;
+  }
 }
 
 /** Sanity görselini sitenin kullandığı `{ src, alt, position }` biçimine çevirir. */

@@ -3,17 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { LogoImage } from "@/content/types";
 import { navItems, telHref } from "@/lib/site";
 import { Logo } from "./Logo";
 
-type HeaderProps = {
-  phones: string[];
-  logoLight?: LogoImage;
-  logoDark?: LogoImage;
-};
-
-export function Header({ phones, logoLight, logoDark }: HeaderProps) {
+export function Header({ phones }: { phones: string[] }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -53,7 +46,7 @@ export function Header({ phones, logoLight, logoDark }: HeaderProps) {
       }`}
     >
       <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
-        <Logo logoLight={logoLight} logoDark={logoDark} onDark={!solid} />
+        <Logo onDark={!solid} />
 
         <nav aria-label="Ana menü" className="hidden lg:block">
           <ul className="flex items-center gap-10">
