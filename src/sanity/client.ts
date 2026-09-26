@@ -1,6 +1,6 @@
 import { createClient, type QueryParams } from "@sanity/client";
 import { createImageUrlBuilder } from "@sanity/image-url";
-import type { Img } from "@/content/types";
+import type { Img, LogoImage } from "@/content/types";
 
 export const sanityConfig = {
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? "",
@@ -42,6 +42,29 @@ export type SanityImage = {
   hotspot?: { x: number; y: number; width: number; height: number };
   crop?: { top: number; bottom: number; left: number; right: number };
 } | null;
+
+/** Sorgudan dönen ham logo nesnesi (bkz. queries.ts → logo) */
+export type SanityLogo = {
+  alt?: string;
+  asset?: { _id?: string; extension?: string; width?: number; height?: number } | null;
+} | null;
+
+/** Header'da logo en fazla 40px yüksekliğinde; yüksek yoğunluklu ekranlar için 4 katı istenir. */
+const LOGO_SOURCE_HEIGHT = 160;
+
+/**
+ * Sanity logosunu header için hazırlar. Kırpma yapılmaz; oran korunur.
+ * SVG logolar PNG'ye çevrilir (Next.js görsel optimizasyonu SVG kabul etmez).
+ */
+export function toLogo(logo: SanityLogo | undefined): LogoImage | undefined {
+  const asset = logo?.asset;
+  if (!builder || !asset?._id || !asset.width || !asset.height) return undefined;
+  const height = Math.min(LOGO_SOURCE_HEIGHT, asset.height);
+  const width = Math.round((asset.width / asset.height) * height);
+  let url = builder.image(asset._id).height(height).fit("max");
+  url = asset.extension === "svg" ? url.format("png") : url.auto("format");
+  return { src: url.url(), alt: logo?.alt ?? "", width, height };
+}
 
 /** Sanity görselini sitenin kullandığı `{ src, alt, position }` biçimine çevirir. */
 export function toImg(image: SanityImage | undefined, width = 2400): Img | undefined {

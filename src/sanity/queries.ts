@@ -1,4 +1,6 @@
 const image = `{ asset, alt, hotspot, crop }`;
+// Logo: oranı korumak için görselin gerçek boyutları ve biçimi de alınır
+const logo = `{ alt, "asset": asset->{ _id, extension, "width": metadata.dimensions.width, "height": metadata.dimensions.height } }`;
 
 const projectFields = `
   title,
@@ -22,7 +24,8 @@ export const servicesQuery = `*[_type == "service"] | order(orderRank asc) { tit
 
 export const settingsQuery = `*[_type == "siteSettings" && _id == "siteSettings"][0] {
   name, tagline, footerStatement, phones, whatsapp, email, address, mapUrl,
-  socialLinks[] { platform, url }, seoTitle, seoDescription, seoKeywords, ogImage ${image}
+  socialLinks[] { platform, url }, seoTitle, seoDescription, seoKeywords, ogImage ${image},
+  logoLight ${logo}, logoDark ${logo}
 }`;
 
 export const homeQuery = `*[_type == "homePage" && _id == "homePage"][0] {

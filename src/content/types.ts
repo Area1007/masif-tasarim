@@ -12,6 +12,14 @@ export type RichSpan = { _type: "span"; _key: string; text: string; marks?: stri
 export type RichBlock = { _type: "block"; _key: string; style?: string; markDefs?: unknown[]; children: RichSpan[] };
 export type RichText = RichBlock[];
 
+/** Header logosu: gerçek boyutlarıyla (en-boy oranını korumak için) */
+export type LogoImage = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
 export type TitleText = { title: string; text: string };
 
 export type SocialLink = { platform: string; url: string };
@@ -30,6 +38,10 @@ export type SiteSettings = {
   seoDescription: string;
   seoKeywords: string[];
   ogImage?: Img;
+  /** Koyu/fotoğraflı zeminde kullanılan açık renkli logo */
+  logoLight?: LogoImage;
+  /** Açık zeminde kullanılan koyu renkli logo */
+  logoDark?: LogoImage;
 };
 
 export type HomeContent = {

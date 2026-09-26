@@ -12,6 +12,28 @@ export const socialPlatforms = [
   {title: 'TikTok', value: 'tiktok'},
 ]
 
+/** Header logosu: kırpma/odak noktası yok (logo olduğu gibi, oranı korunarak gösterilir). */
+function logoField(name: string, title: string, description: string) {
+  return defineField({
+    name,
+    title,
+    type: 'image',
+    group: 'general',
+    description,
+    options: {accept: 'image/png,image/webp,image/svg+xml'},
+    fields: [
+      defineField({
+        name: 'alt',
+        title: 'Alternatif metin',
+        type: 'string',
+        description: 'Ekran okuyucular için, ör. "Masif Tasarım ve Uygulama logosu".',
+        initialValue: 'Masif Tasarım ve Uygulama logosu',
+        validation: (rule) => rule.required().error('Logo için kısa bir açıklama yazın.'),
+      }),
+    ],
+  })
+}
+
 export const siteSettings = defineType({
   name: 'siteSettings',
   title: 'Site Ayarları',
@@ -25,6 +47,19 @@ export const siteSettings = defineType({
   fields: [
     defineField({name: 'name', title: 'Firma adı', type: 'string', group: 'general', validation: (r) => r.required()}),
     defineField({name: 'tagline', title: 'Slogan', type: 'string', group: 'general'}),
+    logoField(
+      'logoLight',
+      'Site Logosu - Açık',
+      'Koyu/fotoğraflı arka planda (ana sayfa ve proje sayfalarının üst kısmı) kullanılan AÇIK renkli logo. ' +
+        'Şeffaf zeminli PNG, WebP veya SVG; yatay ya da sade bir logo önerilir. Header\'da en fazla 40px yükseklikte, ' +
+        'oranı korunarak gösterilir. Boş bırakılırsa bu zeminlerde yazı logosu kullanılır.',
+    ),
+    logoField(
+      'logoDark',
+      'Site Logosu - Koyu',
+      'Beyaz/açık arka planda (sayfa kaydırıldığında, diğer sayfalarda ve mobil menüde) kullanılan KOYU renkli logo. ' +
+        'Şeffaf zeminli PNG, WebP veya SVG. Boş bırakılırsa bu zeminlerde yazı logosu kullanılır.',
+    ),
     headingField('footerStatement', 'Sayfa altı (footer) büyük cümle', {group: 'general'}),
 
     defineField({

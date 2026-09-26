@@ -3,7 +3,7 @@ import { defaultAbout, defaultHome, defaultProjectsPage, defaultServices, defaul
 import type { AboutContent, HomeContent, Img, ProjectsPageContent, Service, SiteSettings } from "@/content/types";
 import { projects as fallbackProjects, type Project, type ProjectCategory } from "@/lib/projects";
 import { normalizeSlug } from "@/lib/slug";
-import { sanityFetch, toImg, type SanityImage } from "@/sanity/client";
+import { sanityFetch, toImg, toLogo, type SanityImage, type SanityLogo } from "@/sanity/client";
 import {
   aboutQuery,
   homeQuery,
@@ -41,8 +41,12 @@ function merge<T extends object>(fallback: T, data: Raw<T>, images: Partial<Reco
 }
 
 export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
-  const data = await sanityFetch<Raw<SiteSettings> & { ogImage?: SanityImage }>(settingsQuery);
-  return merge(defaultSettings, data, { ogImage: toImg(data?.ogImage, 1200) });
+  const data = await sanityFetch<
+    Raw<SiteSettings> & { ogImage?: SanityImage; logoLight?: SanityLogo; logoDark?: SanityLogo }
+  >(settingsQuery);
+  const settings = merge(defaultSettings, data, { ogImage: toImg(data?.ogImage, 1200) });
+  // Logolar yedek içerikte yok; yüklenmemişse header yazı logosunu kullanır.
+  return { ...settings, logoLight: toLogo(data?.logoLight), logoDark: toLogo(data?.logoDark) };
 });
 
 export const getHomeContent = cache(async (): Promise<HomeContent> => {
