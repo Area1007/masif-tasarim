@@ -31,10 +31,14 @@ export async function Footer() {
             </p>
           </div>
 
+          {/* Sütun etiketleri başlık (h2) değil: sayfanın başlık hiyerarşisine site geneli tekrar eden
+              "Menü/İletişim/Hizmetler" girmesin. Listeler etiketleriyle ilişkilendirilir. */}
           <div className="grid gap-10 sm:grid-cols-3 lg:col-span-6">
             <div>
-              <h2 className="mb-5 text-[11px] font-medium uppercase tracking-[0.28em] text-paper/50">Menü</h2>
-              <ul className="space-y-3 text-sm">
+              <p id="footer-menu" className="mb-5 text-[11px] font-medium uppercase tracking-[0.28em] text-paper/50">
+                Menü
+              </p>
+              <ul aria-labelledby="footer-menu" className="space-y-3 text-sm">
                 {navItems.map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className={linkClass}>
@@ -46,8 +50,10 @@ export async function Footer() {
             </div>
 
             <div>
-              <h2 className="mb-5 text-[11px] font-medium uppercase tracking-[0.28em] text-paper/50">İletişim</h2>
-              <ul className="space-y-3 text-sm">
+              <p id="footer-iletisim" className="mb-5 text-[11px] font-medium uppercase tracking-[0.28em] text-paper/50">
+                İletişim
+              </p>
+              <ul aria-labelledby="footer-iletisim" className="space-y-3 text-sm">
                 {settings.phones.map((p) => (
                   <li key={p}>
                     <a href={telHref(p)} className={linkClass}>
@@ -91,8 +97,10 @@ export async function Footer() {
             </div>
 
             <div>
-              <h2 className="mb-5 text-[11px] font-medium uppercase tracking-[0.28em] text-paper/50">Hizmetler</h2>
-              <ul className="space-y-3 text-sm text-paper/80">
+              <p id="footer-hizmetler" className="mb-5 text-[11px] font-medium uppercase tracking-[0.28em] text-paper/50">
+                Hizmetler
+              </p>
+              <ul aria-labelledby="footer-hizmetler" className="space-y-3 text-sm text-paper/80">
                 {services
                   .filter((s) => s.showInFooter)
                   .map((s) => (

@@ -25,6 +25,10 @@ export type Project = {
   featured?: boolean;
   /** Projenin eski adresleri; bu adreslere gelen ziyaretçi güncel adrese yönlendirilir. */
   previousSlugs?: string[];
+  /** Kapaktan üretilen 1200×630 paylaşım görseli (yoksa kapak kullanılır) */
+  shareImage?: ProjectImage;
+  /** Sanity'de son güncellenme zamanı (sitemap lastModified) */
+  updatedAt?: string;
 };
 
 const unsplash = (id: string) =>

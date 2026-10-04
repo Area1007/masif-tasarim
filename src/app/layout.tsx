@@ -2,8 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Manrope } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { getSiteSettings } from "@/lib/content";
-import { siteUrl, toIntlNumber } from "@/lib/site";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { getServices, getSiteSettings } from "@/lib/content";
+import { getDefaultShareImages, openGraphFor, siteJsonLd } from "@/lib/seo";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 // Sanity'deki değişiklikler en geç 60 saniye içinde siteye yansır.
@@ -23,8 +25,10 @@ const instrument = Instrument_Serif({
   display: "swap",
 });
 
+// Canonical burada tanımlanmaz: kök layout'ta verilen canonical tüm alt sayfalara
+// (404 dahil) miras kalırdı. Her sayfa kendi canonical'ını tanımlar.
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings();
+  const [settings, images] = await Promise.all([getSiteSettings(), getDefaultShareImages()]);
   return {
     metadataBase: new URL(siteUrl),
     title: {
@@ -33,16 +37,13 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: settings.seoDescription,
     keywords: settings.seoKeywords,
-    openGraph: {
-      type: "website",
-      locale: "tr_TR",
-      siteName: settings.name,
-      title: settings.name,
+    // Kendi openGraph'ını tanımlamayan sayfalar için varsayılan (ör. 404)
+    openGraph: openGraphFor(settings, {
+      title: settings.seoTitle,
       description: settings.seoDescription,
-      ...(settings.ogImage && { images: [{ url: settings.ogImage.src, alt: settings.ogImage.alt }] }),
-    },
+      images,
+    }),
     twitter: { card: "summary_large_image" },
-    alternates: { canonical: "/" },
   };
 }
 
@@ -51,21 +52,12 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const settings = await getSiteSettings();
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "HomeAndConstructionBusiness",
-    name: settings.name,
-    description: settings.seoDescription,
-    url: siteUrl,
-    telephone: settings.phones,
-    slogan: settings.tagline,
-    ...(settings.email && { email: settings.email }),
-    ...(settings.address && { address: settings.address }),
-    ...(settings.socialLinks.length && { sameAs: settings.socialLinks.map((s) => s.url) }),
-    ...(settings.whatsapp && { contactPoint: { "@type": "ContactPoint", telephone: `+${toIntlNumber(settings.whatsapp)}`, contactType: "customer service" } }),
-  };
+  const [settings, services, images] = await Promise.all([getSiteSettings(), getServices(), getDefaultShareImages()]);
+  const jsonLd = siteJsonLd(
+    settings,
+    services.map((s) => s.title),
+    images?.[0]?.url,
+  );
 
   return (
     <html lang="tr" className={`${manrope.variable} ${instrument.variable}`}>
@@ -81,10 +73,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <Footer />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <JsonLd data={jsonLd} />
       </body>
     </html>
   );

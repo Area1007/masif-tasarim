@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Container } from "@/components/ui/primitives";
 import { RichText } from "@/components/ui/RichText";
 import { getHomeContent, getProjects, getSiteSettings } from "@/lib/content";
+import { brandName } from "@/lib/site";
 import { trimLogo } from "@/sanity/client";
 
 export async function Hero() {
@@ -75,6 +76,11 @@ export async function Hero() {
           className="animate-fade-up max-w-5xl font-display text-[clamp(2.5rem,6vw,5.75rem)] leading-[0.98] tracking-[-0.02em]"
           style={{ animationDelay: "350ms" }}
         >
+          {/*
+           * Marka ve hizmet adı başlığın metninde de yer alsın (arama motorları, ekran okuyucular).
+           * Görsel karşılığı hemen üstteki logo ve hizmet etiketidir; görünüm değişmez.
+           */}
+          <span className="sr-only">{brandName}: Mimari Tasarım ve İç Mimari Tasarım. </span>
           <RichText value={home.heroTitle} emClassName="text-bone/90" />
         </h1>
 

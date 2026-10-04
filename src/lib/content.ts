@@ -3,10 +3,11 @@ import { defaultAbout, defaultHome, defaultProjectsPage, defaultServices, defaul
 import type { AboutContent, HomeContent, Img, ProjectsPageContent, Service, SiteSettings } from "@/content/types";
 import { projects as fallbackProjects, type Project, type ProjectCategory } from "@/lib/projects";
 import { normalizeSlug } from "@/lib/slug";
-import { sanityFetch, toImg, toLogo, type SanityImage, type SanityLogo } from "@/sanity/client";
+import { sanityFetch, toImg, toLogo, toShareImage, type SanityImage, type SanityLogo } from "@/sanity/client";
 import {
   aboutQuery,
   homeQuery,
+  pageUpdatesQuery,
   projectsPageQuery,
   projectsQuery,
   servicesQuery,
@@ -44,7 +45,8 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   const data = await sanityFetch<
     Raw<SiteSettings> & { ogImage?: SanityImage; logoLight?: SanityLogo; logoDark?: SanityLogo }
   >(settingsQuery);
-  const settings = merge(defaultSettings, data, { ogImage: toImg(data?.ogImage, 1200) });
+  // Paylaşım görseli her zaman 1200×630 kırpılır (Open Graph önerilen ölçü)
+  const settings = merge(defaultSettings, data, { ogImage: toShareImage(data?.ogImage) });
   // Logolar yedek içerikte yok; yüklenmemişse header yazı logosunu kullanır.
   return { ...settings, logoLight: toLogo(data?.logoLight), logoDark: toLogo(data?.logoDark) };
 });
@@ -114,6 +116,8 @@ export const getProjects = cache(async (): Promise<Project[]> => {
         gallery: (p.gallery ?? []).map((img) => toImg(img)).filter((img): img is Img => Boolean(img)),
         featured: Boolean(p.featured),
         previousSlugs: (p.previousSlugs ?? []).map(normalizeSlug).filter((s) => s && s !== slug),
+        shareImage: toShareImage(p.cover),
+        updatedAt: p.updatedAt,
       },
     ];
   });
@@ -151,4 +155,10 @@ export async function getGalleryImages() {
     .flatMap((p) => p.gallery.map((img) => ({ ...img, project: p.title, slug: p.slug })))
     .filter((img) => !seen.has(img.src) && seen.add(img.src))
     .slice(0, 9);
+}
+
+/** Sitemap için proje dışı sayfaların son güncellenme zamanları (Sanity yoksa boş). */
+export async function getPageUpdates() {
+  const data = await sanityFetch<{ home?: string | null; projectsPage?: string | null }>(pageUpdatesQuery);
+  return { home: data?.home ?? undefined, projectsPage: data?.projectsPage ?? undefined };
 }

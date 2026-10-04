@@ -3,7 +3,8 @@ import { siteUrl } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/" },
+    // /api/ yalnızca Sanity webhook'u içindir; taranacak içerik yok
+    rules: { userAgent: "*", allow: "/", disallow: "/api/" },
     sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

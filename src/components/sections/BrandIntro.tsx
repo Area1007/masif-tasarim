@@ -10,9 +10,10 @@ export async function BrandIntro() {
     <section id="marka" className="bg-paper py-24 sm:py-32 lg:py-44">
       <Container>
         <Reveal>
-          <p className="font-display text-[clamp(2rem,4.6vw,4.25rem)] leading-[1.12] tracking-[-0.015em] text-ink">
+          {/* Bölüm başlığı: alttaki adımlar (h3) bu başlığa bağlanır. Etiket h2, görünüm aynı. */}
+          <h2 className="font-display text-[clamp(2rem,4.6vw,4.25rem)] leading-[1.12] tracking-[-0.015em] text-ink">
             <RichText value={brandStatement} emClassName="text-muted" accentClassName="text-oak" />
-          </p>
+          </h2>
         </Reveal>
 
         <div className="mt-20 grid gap-px bg-line sm:mt-28 md:grid-cols-3">

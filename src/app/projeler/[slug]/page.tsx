@@ -5,8 +5,10 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowIcon, Button, Container, Eyebrow } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/Reveal";
 import { ProjectGallery } from "@/components/sections/ProjectGallery";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getAdjacentProject, getProject, getProjectByPreviousSlug, getProjects, getSiteSettings } from "@/lib/content";
 import { decodeSlugParam, normalizeSlug } from "@/lib/slug";
+import { openGraphFor, projectBreadcrumbJsonLd, projectShareImages } from "@/lib/seo";
 
 // Sanity'ye sonradan eklenen projeler de yeniden deploy gerekmeden yayınlanır.
 export const dynamicParams = true;
@@ -25,15 +27,20 @@ export async function generateMetadata({ params }: PageProps<"/projeler/[slug]">
   const [project, settings] = await Promise.all([getProject(slug), getSiteSettings()]);
   if (!project) return {};
 
+  const url = `/projeler/${project.slug}`;
   return {
-    title: `${project.title} — ${project.category}`,
+    // Ör. "Meşe Evi — Konut, İstanbul" (konum projenin kendi künyesinden gelir)
+    title: `${project.title} — ${[project.category, project.location].filter(Boolean).join(", ")}`,
     description: project.summary,
-    alternates: { canonical: `/projeler/${project.slug}` },
-    openGraph: {
+    alternates: { canonical: url },
+    openGraph: openGraphFor(settings, {
+      type: "article",
+      url,
       title: `${project.title} | ${settings.name}`,
       description: project.summary,
-      images: [{ url: project.cover.src, alt: project.cover.alt }],
-    },
+      images: projectShareImages(project),
+      ...(project.updatedAt && { modifiedTime: project.updatedAt }),
+    }),
   };
 }
 
@@ -63,6 +70,7 @@ export default async function ProjectPage({ params }: PageProps<"/projeler/[slug
 
   return (
     <article>
+      <JsonLd data={projectBreadcrumbJsonLd(project)} />
       {/* Kapak */}
       <header className="relative isolate flex min-h-[88svh] items-end overflow-hidden bg-ink text-paper">
         <Image

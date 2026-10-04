@@ -3,15 +3,26 @@ import { Container, Eyebrow } from "@/components/ui/primitives";
 import { ProjectsGrid } from "@/components/sections/ProjectsGrid";
 import { ContactCTA } from "@/components/sections/ContactCTA";
 import { RichText } from "@/components/ui/RichText";
-import { getProjects, getProjectsPageContent } from "@/lib/content";
+import { getProjects, getProjectsPageContent, getSiteSettings } from "@/lib/content";
+import { getDefaultShareImages, openGraphFor } from "@/lib/seo";
 import { projectCategories } from "@/lib/projects";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getProjectsPageContent();
+  const [page, settings, images] = await Promise.all([
+    getProjectsPageContent(),
+    getSiteSettings(),
+    getDefaultShareImages(),
+  ]);
   return {
     title: "Projeler",
     description: page.seoDescription,
     alternates: { canonical: "/projeler" },
+    openGraph: openGraphFor(settings, {
+      url: "/projeler",
+      title: `Projeler | ${settings.name}`,
+      description: page.seoDescription,
+      images,
+    }),
   };
 }
 

@@ -96,6 +96,28 @@ export async function trimLogo(logo: LogoImage): Promise<LogoImage> {
   }
 }
 
+/** Sosyal medya paylaşım görseli (Open Graph) ölçüsü */
+export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 };
+
+/**
+ * Sanity görselinden 1200×630 paylaşım görseli üretir. Kırpma, Studio'da seçilen odak
+ * noktasına göre yapılır. Biçim JPG'ye sabitlenir: bazı paylaşım önizlemeleri AVIF/WebP okumaz.
+ */
+export function toShareImage(image: SanityImage | undefined): Img | undefined {
+  if (!builder || !image?.asset) return undefined;
+  return {
+    src: builder
+      .image(image)
+      .width(SHARE_IMAGE_SIZE.width)
+      .height(SHARE_IMAGE_SIZE.height)
+      .fit("crop")
+      .format("jpg")
+      .quality(80)
+      .url(),
+    alt: image.alt ?? "",
+  };
+}
+
 /** Sanity görselini sitenin kullandığı `{ src, alt, position }` biçimine çevirir. */
 export function toImg(image: SanityImage | undefined, width = 2400): Img | undefined {
   if (!builder || !image?.asset) return undefined;

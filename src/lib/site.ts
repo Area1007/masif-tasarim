@@ -1,7 +1,17 @@
 /** Kodda sabit kalan site yapısı. Düzenlenebilir içerikler Sanity'den gelir (bkz. lib/content.ts). */
 
-// Yayına alınırken gerçek alan adı NEXT_PUBLIC_SITE_URL ile verilmeli.
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+// Canonical, sitemap, robots ve Open Graph adreslerinin tabanı. NEXT_PUBLIC_SITE_URL ile
+// değiştirilebilir (ör. test ortamı); tanımlı değilse yayındaki alan adı kullanılır.
+export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.masiftasarim.com").replace(/\/+$/, "");
+
+/** Google'ın site adı olarak göstermesi istenen kısa marka adı (WebSite şeması, H1). */
+export const brandName = "Masif Tasarım";
+
+/** Yapılandırılmış verideki (JSON-LD) varlıkların kalıcı kimlikleri */
+export const schemaIds = {
+  website: `${siteUrl}/#website`,
+  business: `${siteUrl}/#business`,
+};
 
 export const navItems = [
   { label: "Stüdyo", href: "/#hakkimizda" },

@@ -14,6 +14,7 @@ const projectFields = `
   summary,
   description,
   featured,
+  "updatedAt": _updatedAt,
   cover ${image},
   gallery[] ${image}
 `;
@@ -39,6 +40,12 @@ export const aboutQuery = `*[_type == "aboutPage" && _id == "aboutPage"][0] {
   eyebrow, title, paragraphs, linkLabel, mainImage ${image}, detailImage ${image}
 }`;
 
-export const projectsPageQuery = `*[_type == "projectsPage" && _id == "projectsPage"][0] {
+// Sitemap: proje dışı sayfaların son güncellenme zamanları
+export const pageUpdatesQuery = `{
+  "home": *[_type in ["homePage", "aboutPage", "siteSettings", "service"]] | order(_updatedAt desc)[0]._updatedAt,
+  "projectsPage": *[_type == "projectsPage" && _id == "projectsPage"][0]._updatedAt
+}`;
+
+export const projectsPageQuery =`*[_type == "projectsPage" && _id == "projectsPage"][0] {
   eyebrow, title, intro, seoDescription
 }`;
